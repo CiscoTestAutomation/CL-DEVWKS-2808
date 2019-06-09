@@ -13,8 +13,6 @@ Cisco pyATS/Genie SDK:
 4. profile your device features
 5. and build a full-on script!
 
-
-
 ## Basic Device Connection
 
 Automation revolves around being able to programmically establish connection
@@ -109,6 +107,38 @@ Each platform plugin contains information such as:
 There is no hard-coded information for Cisco-only platforms - everything is a
 plugin. This means you can adjust the behavior for your target platform, or, 
 implement your own platform plugin for other vendors.
+
+## Using Mock Devices
+
+For ease of training purposes, the rest of this training session
+no longer require access to real testbed devices - a mock device is included. 
+
+To use the mock device, in the workspace folder, source the testbed environment
+file.
+
+```bash
+. env/testbed
+```
+
+This will set the necessary virtual environment variables to use mocks devices.
+
+**Limitations**:
+- one-use: each time you connect to the device, the inter counters are reset and
+  you can issue the commands only once. To repeatedly use the same mocks, 
+  re-launch your python process/script.
+
+- no configuration/states: the mocks are good for show commands - does not
+  handle configuration changes
+
+To get out of using mocks, close this shell window, or
+
+```bash
+. env/unset
+```
+
+Note that if you have your own testbed devices, you can modify the testbed YAML
+files accordingly and proceed without mocks, using your own devices.
+
 
 ## Defining a Testbed YAML File
 
@@ -287,37 +317,6 @@ Further reading on pyATS testbed file and connection details:
 > Under pyATS | Genie design, connection implementation exists in the form of
 > a library. You can override the default connection class (Unicon) if you wish,
 > and provide your own implementation.
-
-## Using Mock Devices
-
-For ease of training purposes, the rest of this training session
-no longer require access to real testbed devices - a mock device is included. 
-
-To use the mock device, in the workspace folder, source the testbed environment
-file.
-
-```bash
-. env/testbed
-```
-
-This will set the necessary virtual environment variables to use mocks devices.
-
-**Limitations**:
-- one-use: each time you connect to the device, the inter counters are reset and
-  you can issue the commands only once. To repeatedly use the same mocks, 
-  re-launch your python process/script.
-
-- no configuration/states: the mocks are good for show commands - does not
-  handle configuration changes
-
-To get out of using mocks, close this shell window, or
-
-```bash
-. env/unset
-```
-
-Note that if you have your own testbed devices, you can modify the testbed YAML
-files accordingly and proceed without mocks, using your own devices.
 
 
 ## Parsing Device Outputs

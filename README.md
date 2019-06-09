@@ -84,9 +84,9 @@ and now you should be ready to get going!
 ## Repository Content
 
 ```text
-    testbed.yaml                      testbed YAML file to connect to our devices
     recordings/                       mock device recordings
     env/                              shortcut files that sets the right recording files to use
+    files/                            files we will create in this workshop for your reference
     README.md                         this file
     workshop.md                       main workshop instructions
 ```
