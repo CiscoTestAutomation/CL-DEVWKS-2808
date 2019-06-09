@@ -307,6 +307,30 @@ You can specify which connection desciption to use, as `via`:
 csr.connect(via = 'mgmt')
 ```
 
+If you are uncomfortable with putting straight username and passwords in your 
+testbed file, you can use environment variables instead. 
+
+```yaml
+devices:
+    csr1000v-1:
+        type: router
+        os: iosxe
+        alias: helper
+        tacacs:
+            username: "%ENV{DEVICE_USERNAME}"
+        passwords:
+            tacacs: "%ENV{DEVICE_TACACS_PWD}"
+            enable: "%ENV{DEVICE_ENABLE_PWD}"
+            line: "%ENV{DEVICE_LINE_PWD}"
+        connections:
+            console:
+              protocol: telnet
+              ip: 172.25.192.90
+              port: 17002
+```
+Ensure the corresponding environment variables are set - during testbed file
+loading, these references will be then subsitituted with actual values.
+
 Further reading on pyATS testbed file and connection details:
 - schema: supported testbed yaml keys https://pubhub.devnetcloud.com/media/pyats/docs/topology/schema.html#
 - how connection is modeled and controlled, including support for multiple 
