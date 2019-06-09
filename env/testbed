@@ -1,0 +1,2 @@
+export unicon_replay=`pwd`/recordings/testbed
+export unicon_speed=10

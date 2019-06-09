@@ -142,7 +142,7 @@ files accordingly and proceed without mocks, using your own devices.
 
 ## Defining a Testbed YAML File
 
-Unicon connection classe are a portable way to get into a single device. 
+Unicon connection class is a portable way to get into a single device. 
 However, when it comes to real networks, often there is an array of devices that
 are interconnected, and much more information that describes each device. This
 is where testbed file comes in.
@@ -485,6 +485,14 @@ following:
 - print a table of all interfaces and their CRC error counter
 - print the # of BGP neighbors they have
 
+For this script, because we want to print a nice table, let's make use of an
+awesome PyPI package called [tabulate](https://bitbucket.org/astanin/python-tabulate/src/master/)
+
+```bash
+# install tabulate as a dependency
+pip install tabulate
+```
+
 ```python
 
 from tabulate import tabulate
@@ -511,7 +519,7 @@ for device in testbed:
     
     print(tabulate(nbr_info, headers = ['BGP Instance', 'VRF', 'Neighbor', 'State']))
 
-    active_nbr = len([i for i in nbr_info if i[-1] == 'established'])
+    active_nbr = len([i for i in nbr_info if i[-1].lower() == 'established'])
     print('\nTotal # of Active Neighbors: %s' % active_nbr)
     print('-'*80 + '\n')
 

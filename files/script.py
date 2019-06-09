@@ -25,6 +25,6 @@ for device in testbed:
     
     print(tabulate(nbr_info, headers = ['BGP Instance', 'VRF', 'Neighbor', 'State']))
 
-    active_nbr = len([i for i in nbr_info if i[-1] == 'established'])
+    active_nbr = len([i for i in nbr_info if i[-1].lower() == 'established'])
     print('\nTotal # of Active Neighbors: %s' % active_nbr)
     print('-'*80 + '\n')
