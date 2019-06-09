@@ -1,0 +1,9 @@
+devices:
+    csr1000v-1:
+        type: router
+        os: iosxe
+        connections:
+            console:
+                protocol: telnet
+                ip: 172.25.192.90
+                port: 17001
