@@ -72,6 +72,9 @@ pip install pyats genie
 ```bash
 # clone this repo
 git clone https://github.com/CiscoTestAutomation/CL-DEVWKS-2808.git workshop
+
+# cd to the directory
+cd workshop
 ```
 
 and now you should be ready to get going!
