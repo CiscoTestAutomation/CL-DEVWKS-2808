@@ -1,0 +1,31 @@
+#! /bin/bash
+
+# ------------------------------------------------------------------------------
+#                                     Note
+#
+#   these instructions are used during CLUS for setting up the Macbooks.
+# ------------------------------------------------------------------------------
+
+# install pyenv and python
+brew install pyenv
+sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+pyenv install 3.6.8
+
+# create a development directory
+mkdir -p ~/workspace/devwks-2808
+cd ~/workspace/devwks-2808
+
+# create python virtual environment
+~/.pyenv/versions/3.6.8/bin/python -m venv .
+
+# activate virtual environment
+source bin/activate
+
+# update your pip/setuptools
+pip install --upgrade pip setuptools
+
+# install genie and genie robot library
+pip install --pre pyats genie genie.libs.robot tabulate
+
+# clone this repo
+git clone https://github.com/CiscoTestAutomation/CL-DevNet-2595/ workshop
