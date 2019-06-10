@@ -4,6 +4,7 @@
 #                                     Note
 #
 #   these instructions are used during CLUS for setting up the Macbooks.
+#   wget -O - https://raw.githubusercontent.com/CiscoTestAutomation/CL-DEVWKS-2808/master/mac_setup.sh | bash
 # ------------------------------------------------------------------------------
 
 # install pyenv and python
