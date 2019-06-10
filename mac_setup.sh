@@ -26,7 +26,7 @@ source bin/activate
 pip install --upgrade pip setuptools
 
 # install genie and genie robot library
-pip install --pre pyats genie genie.libs.robot tabulate
+pip install --pre pyats genie genie.libs.robot tabulate ipython
 
 # clone this repo
 git clone https://github.com/CiscoTestAutomation/CL-DEVWKS-2808 workshop
