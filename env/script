@@ -1,2 +1,0 @@
-export unicon_replay=`pwd`/recordings/script
-export unicon_speed=10

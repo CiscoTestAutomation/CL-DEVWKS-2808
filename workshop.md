@@ -213,7 +213,7 @@ csr = testbed.devices['csr1000v-1']
 
 # connect and run commands
 csr.connect()
-csr.execute('show interface')
+csr.execute('show interfaces')
 ```
 
 Now let's expand our concept - throw in a slightly bigger testbed yaml file.
@@ -266,7 +266,7 @@ We can now connect to each testbed device individually.
 from pyats.topology import loader
 
 # load the testbed file
-testbed = loader.load('two-device-testbed.yaml')
+testbed = loader.load('files/testbed.yaml')
 
 # because we assigned aliases to each device, we can refer by alias instead
 nx = testbed.devices['uut']
