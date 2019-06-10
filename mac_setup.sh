@@ -29,4 +29,4 @@ pip install --upgrade pip setuptools
 pip install --pre pyats genie genie.libs.robot tabulate
 
 # clone this repo
-git clone https://github.com/CiscoTestAutomation/CL-DevNet-2595/ workshop
+git clone https://github.com/CiscoTestAutomation/CL-DEVWKS-2808 workshop
