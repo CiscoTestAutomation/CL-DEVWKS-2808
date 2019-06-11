@@ -258,7 +258,7 @@ To use these parsers, first, load your testbed yaml file.
 ```python
 from genie.testbed import load
 
-testbed = load('files/testbed.yaml')
+testbed = load('files/workshop-testbed.yaml')
 uut = testbed.devices['uut']
 uut.connect()
 ```
