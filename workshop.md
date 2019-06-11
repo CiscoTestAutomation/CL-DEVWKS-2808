@@ -7,147 +7,21 @@ the expected outcomes are seen.
 In this workshop, we’ll dive deep into the world of Python programming with 
 Cisco pyATS/Genie SDK: 
 
-1. establish connection to your devices, issue commands, retrieve response
-2. how to represent your testbed devices and its topolgy in YAML
+1. how to represent your testbed devices and its topology in YAML
+2. connect to the devices
 3. parse your device outputs
 4. profile your device features
 5. and build a full-on script!
 
-## Basic Device Connection
+
+## Step 1: Defining a Testbed YAML File
 
 Automation revolves around being able to programmically establish connection
-to your testbed devices. There are tools out there today that helps you with
-this, eg:
+to your testbed devices. To do that, we need to first "describe" what devices
+we have, and "how" to connect to them. In pyATS | Genie ecosystem, this is 
+done using a testbed file. 
 
-- [Paramiko](http://www.paramiko.org/): Python implementation of SSH client 
-- [Pexpect](https://pexpect.readthedocs.io/en/stable/): Python module for 
-  spawning child applications (eg, telnet/ssh) and interact with them 
-- [Netmiko](https://github.com/ktbyers/netmiko): multi-vendor library that
-  simplifies Paramiko SSH connections to network devices 
-
-These libraries are good at establishing low-level connectivity to your devices,
-and allows basic device interactions. However, what they do not provide is 
-high-level services: stateful handling of various router/switch prompt states, 
-and advanced mechanisms such as dialogs prompts, etc.
-
-In pyATS | Genie automation ecosystem, the de-facto device control library
-is called [Unicon](https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/index.html).
-
-Compared to the solutions above, Unicon provides both low-level connectivity 
-APIs, eg `sendline`, `expect`, but also high-level apis such as `execute`, 
-`configure`, `ping`, etc, the system dialogs for different platforms can be
-automatically handled.
-
-> The example below uses Cisco [DevNet Sandbox](https://developer.cisco.com/site/sandbox/)
-> [IOSXE Always-ON testbed](https://devnetsandbox.cisco.com/RM/Diagram/Index/38ded1f0-16ce-43f2-8df5-43a40ebf752e?diagramType=Topology).
-
-You can use Unicon directly in your Python interactive shell:
-
-```python
-# import connection implementation
-from unicon import Connection
-
-# create connection object instance
-conn = Connection(hostname = 'csr1000v-1',
-                  start = ['ssh developer@ios-xe-mgmt-latest.cisco.com -p 8181'],
-                  line_password='C1sco12345',
-                  os = 'iosxe')
-
-# start the connection
-conn.connect()
-
-# now you can do stuff
-conn.execute('show version')
-conn.execute('show run | section interface')
-
-# configure stuff
-conn.configure('''
-interface GigabitEthernet2
-   ip address 1.1.1.1 255.255.255.0
-   no shutdown
-''')
-
-conn.configure('''
-interface GigabitEthernet2
-   no ip address
-   shutdown
-''')
-
-# ping an ip
-conn.ping('10.10.20.48')
-
-# traceroute an ip
-conn.traceroute('10.10.20.48')
-
-```
-
-Notice how the ping and traceroute interfaces are automatically handled for you.
-
-What you have at hand is now a Unicon connection class instance. Each instance,
-depending on the specified OS, supports various different services.
-
-- Connection Documentation: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/connection.html
-- Supported Platforms: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/introduction.html#supported-platforms
-- Services per OS: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/services/index.html
-
-Under Unicon connection framework, the core handles boilerplate connection
-details such as spawning child processes, send/receive/expect output, etc. Per
-platform support is achieved through platform plugins, under:
-
-```bash
-    # note - * represents your python version.
-    $VIRTUAL_ENV/lib/python*/site-packages/unicon/plugins/
-```
-
-Each platform plugin contains information such as:
-
-- expected command prompt for each state of the device (eg, enable, configure)
-- various service implementations (eg, `reload()`)
-
-There is no hard-coded information for Cisco-only platforms - everything is a
-plugin. This means you can adjust the behavior for your target platform, or, 
-implement your own platform plugin for other vendors.
-
-## Using Mock Devices
-
-For ease of training purposes, the rest of this training session
-no longer require access to real testbed devices - a mock device is included. 
-
-To use the mock device, in the workspace folder, source the testbed environment
-file.
-
-```bash
-. env/testbed
-```
-
-This will set the necessary virtual environment variables to use mocks devices.
-
-**Limitations**:
-- one-use: each time you connect to the device, the inter counters are reset and
-  you can issue the commands only once. To repeatedly use the same mocks, 
-  re-launch your python process/script.
-
-- no configuration/states: the mocks are good for show commands - does not
-  handle configuration changes
-
-To get out of using mocks, close this shell window, or
-
-```bash
-. env/unset
-```
-
-Note that if you have your own testbed devices, you can modify the testbed YAML
-files accordingly and proceed without mocks, using your own devices.
-
-
-## Defining a Testbed YAML File
-
-Unicon connection class is a portable way to get into a single device. 
-However, when it comes to real networks, often there is an array of devices that
-are interconnected, and much more information that describes each device. This
-is where testbed file comes in.
-
-A testbed file is a [YAML](https://yaml.org/spec/1.2/spec.html) syntax file that
+Testbed files leverages [YAML](https://yaml.org/spec/1.2/spec.html) syntax to
 describes your devices and their inter-connectivity. It is the basis of almost
 all pyATS | Genie based automation.
 
@@ -198,11 +72,24 @@ pyats validate testbed files/simple-testbed.yaml
 Let's now load this testbed file in Python, and, like above, initiate 
 connection to our device and do some fun stuff.
 
+> Note - 
+> 
+> If you have real devices - you can put in their device information and
+> connect to them. For the ease of this workshop, we provided mock devices.
+> They're not real devices, but "emulate" what a device can do, using pure
+> Python code.
+>
+> To use the mock device, do: `. env/testbed`.
+> This sets the environment variables needed for the engine to "connect" to
+> the provided mock devices.
+>
+> To unset the environment variables, do `. env/unset`
+
 ```python
-from pyats.topology import loader
+from genie.testbed import load
 
 # load the testbed file
-testbed = loader.load('files/simple-testbed.yaml')
+testbed = load('files/simple-testbed.yaml')
 
 # let's see our testbed devices
 testbed.devices
@@ -263,10 +150,10 @@ devices:
 We can now connect to each testbed device individually.
 
 ```python
-from pyats.topology import loader
+from genie.testbed import load
 
 # load the testbed file
-testbed = loader.load('files/testbed.yaml')
+testbed = load('files/two-device-testbed.yaml')
 
 # because we assigned aliases to each device, we can refer by alias instead
 nx = testbed.devices['uut']
@@ -342,8 +229,20 @@ Further reading on pyATS testbed file and connection details:
 > a library. You can override the default connection class (Unicon) if you wish,
 > and provide your own implementation.
 
+## Mocked Testbed/Devices
 
-## Parsing Device Outputs
+For the remainder of this workshop, we'll be using the pre-created testbed mock
+file:
+
+```text
+files/workshop-testbed.yaml
+```
+
+Mock devices are "pre-recorded" device interactions that can be "played back".
+This eliminates the need to use real devices during a training session
+
+
+## Step 2: Parsing Device Outputs
 
 Now that you have connectivity to your devices, let's do something more fun.
 
@@ -364,37 +263,19 @@ uut = testbed.devices['uut']
 uut.connect()
 ```
 
-Wait wait wait - what's this `genie testbed`? Were we not using pyATS testbeds 
-just a few moments ago?!
-
-We were. But let's clarify. 
-- pyATS is the foundation - it comes with all the generic framework skeleton
-- Genie is the network automation library framework on top. 
-
-Genie naturally extends pyATS's objects and models, and features ready-to-use 
-libraries, such as parsers. What you saw above is a core representation of
-how pyATS works and models things. However - for all intents and purposes for
-NetDevOps and network automation, we'll be focusing on Genie.
-
-**So am I using Genie or pyATS?**
-
-*Both*. Genie extends pyATS - so whenever you are using Genie, you *are* using
-pyATS.
-
-How let's get back to our exercise. Notice that everytime we go into shell, 
-we have to import the testbed loader and load the yaml file. There's must be a
-better way.
+Wait wait wait - do I have to type this every single time? There's must be a
+better way!
 
 ```bash
 # launch python interactive shell, and load teh testbed yaml file
-genie shell --testbed-file files/testbed.yaml
+genie shell --testbed-file files/workshop-testbed.yaml
 # Welcome to Genie Interactive Shell
 # ==================================
 # Python 3.6.5 (default, Jun 27 2018, 10:39:16)
 # [GCC 4.2.1 Compatible Apple LLVM 10.0.0 (clang-1000.10.25.5)]
 
 # >>> from genie.testbed import load
-# >>> testbed = load('testbed.yaml')
+# >>> testbed = load('files/workshop-testbed.yaml')
 # -------------------------------------------------------------------------------
 # >>>
 ```
@@ -442,8 +323,18 @@ pprint.pprint(intfs['Ethernet2/1']['counters'])
 
 Can you think of... the things you can do now, with this?
 
+```python
+# make sure interface has no CRC errors
+for intf, intf_data in sorted(intfs.items()):
+    if 'counters' in intf_data and 'in_crc_errors' in intf_data['counters']:
+        print('%-20s' % intf, intf_data['counters']['in_crc_errors'])
+    else:
+        print('%-20s' % intf, '---')
 
-## Profile Device Features
+```
+
+
+## Step 3: Profile Device Features
 
 What you have now is awesome. But we're still dealing with single CLIs. How can
 we step back, get a bigger picture in view, and look at an entire feature?
@@ -498,7 +389,7 @@ Because Genie models are agnostic across different platforms, you can write a
 piece of code once, and port it across different devices.
 
 
-## Putting It All Together
+## Step 4: Putting It All Together
 
 Now let's put everything we've learnt and write a useful script together. For
 this script, we'll make it interesting and for each connected device, do the
@@ -548,3 +439,104 @@ for device in testbed:
     print('-'*80 + '\n')
 
 ```
+
+
+## Extras: Device Connection Under the Bonnet
+
+Automation revolves around being able to programmically establish connection
+to your testbed devices. There are tools out there today that helps you with
+this, eg:
+
+- [Paramiko](http://www.paramiko.org/): Python implementation of SSH client 
+- [Pexpect](https://pexpect.readthedocs.io/en/stable/): Python module for 
+  spawning child applications (eg, telnet/ssh) and interact with them 
+- [Netmiko](https://github.com/ktbyers/netmiko): multi-vendor library that
+  simplifies Paramiko SSH connections to network devices 
+
+These libraries are good at establishing low-level connectivity to your devices,
+and allows basic device interactions. However, what they do not provide is 
+high-level services: stateful handling of various router/switch prompt states, 
+and advanced mechanisms such as dialogs prompts, etc.
+
+In pyATS | Genie automation ecosystem, the de-facto device control library
+is called [Unicon](https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/index.html).
+In the workshop above, whenever we are establishing connectivity to our testbed
+devices, we are using Unicon.
+
+Compared to the solutions above, Unicon provides both low-level connectivity 
+APIs, eg `sendline`, `expect`, but also high-level apis such as `execute`, 
+`configure`, `ping`, etc, the system dialogs for different platforms can be
+automatically handled.
+
+Testbed YAML gives you a more human way of describing testbed devices and simply
+using them as objects, and establishing connectivity. But if you are interested
+in what's going on under the hood, you can use Unicon directly in your Python 
+code. 
+
+> The example below uses Cisco [DevNet Sandbox](https://developer.cisco.com/site/sandbox/)
+> [IOSXE Always-ON testbed](https://devnetsandbox.cisco.com/RM/Diagram/Index/38ded1f0-16ce-43f2-8df5-43a40ebf752e?diagramType=Topology).
+
+```python
+# import connection implementation
+from unicon import Connection
+
+# create connection object instance
+conn = Connection(hostname = 'csr1000v-1',
+                  start = ['ssh developer@ios-xe-mgmt-latest.cisco.com -p 8181'],
+                  line_password='C1sco12345',
+                  os = 'iosxe')
+
+# start the connection
+conn.connect()
+
+# now you can do stuff
+conn.execute('show version')
+conn.execute('show run | section interface')
+
+# configure stuff
+conn.configure('''
+interface GigabitEthernet2
+   ip address 1.1.1.1 255.255.255.0
+   no shutdown
+''')
+
+conn.configure('''
+interface GigabitEthernet2
+   no ip address
+   shutdown
+''')
+
+# ping an ip
+conn.ping('10.10.20.48')
+
+# traceroute an ip
+conn.traceroute('10.10.20.48')
+
+```
+Notice how the ping and traceroute interfaces are automatically handled for you.
+
+What you have at hand is now a Unicon connection class instance. Each instance,
+depending on the specified OS, supports various different services.
+
+- Connection Documentation: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/connection.html
+- Supported Platforms: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/introduction.html#supported-platforms
+- Services per OS: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/services/index.html
+
+Under Unicon connection framework, the core handles boilerplate connection
+details such as spawning child processes, send/receive/expect output, etc. Per
+platform support is achieved through platform plugins, under:
+
+```bash
+    # note - * represents your python version.
+    $VIRTUAL_ENV/lib/python*/site-packages/unicon/plugins/
+```
+
+Each platform plugin contains information such as:
+
+- expected command prompt for each state of the device (eg, enable, configure)
+- various service implementations (eg, `reload()`)
+
+There is no hard-coded information for Cisco-only platforms - everything is a
+plugin. This means you can adjust the behavior for your target platform, or, 
+implement your own platform plugin for other vendors.
+

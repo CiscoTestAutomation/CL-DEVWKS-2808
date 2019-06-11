@@ -3,18 +3,21 @@ HERE = os.path.dirname(__file__)
 
 from tabulate import tabulate
 from genie.testbed import load
+    
+if __name__ == '__main__':
+    testbed = load(os.path.join(HERE, 'workshop-testbed.yaml'))
 
-testbed = load(os.path.join(HERE, 'testbed.yaml'))
+    uut = testbed.devices['uut']
+    helper = testbed.devices['helper']
 
-for device in testbed:
-    device.connect()
-    device_info = device.learn('platform')
-    bgp = device.learn('bgp')
+    uut.connect()
+    info = uut.learn('platform')
+    bgp = uut.learn('bgp')
 
     # print useful information
     print('\n' + '-'*80)
-    print('Hostname: %s' % device.name)
-    print('Software Version: %s %s\n' % (device_info.os, device_info.version))
+    print('Hostname: %s' % uut.name)
+    print('Software Version: %s %s\n' % (info.os, info.version))
     
     nbr_info = []
     for bgp_instance in bgp.info['instance']:

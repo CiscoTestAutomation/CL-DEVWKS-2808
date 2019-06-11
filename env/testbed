@@ -1,2 +1,2 @@
-export unicon_replay=`pwd`/recordings
+export unicon_replay=`pwd`/recordings/replay
 export unicon_speed=10

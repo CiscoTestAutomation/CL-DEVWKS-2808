@@ -1,0 +1,18 @@
+devices:
+    nx-osv-1:
+        type: 'router'
+        os: 'nxos'
+        alias: 'uut'
+        connections:
+            console:
+                command: mock_device_cli --os nxos --mock_data_dir recordings/yamls/nxos --state execute
+                protocol: mock
+
+    csr1000v-1:
+        type: 'router'
+        os: "iosxe"
+        alias: 'helper'
+        connections:
+            console:
+                command: mock_device_cli --os iosxe --mock_data_dir recordings/yamls/csr --state execute
+                protocol: mock
