@@ -1,3 +1,6 @@
+testbed:
+    name: CL-DEVWKS-2808-WORKSHOP-MOCK-TB
+
 devices:
     nx-osv-1:
         type: 'router'
@@ -16,3 +19,4 @@ devices:
             console:
                 command: mock_device_cli --os iosxe --mock_data_dir recordings/yamls/csr --state execute
                 protocol: mock
+
