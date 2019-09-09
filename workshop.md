@@ -16,14 +16,14 @@ Cisco pyATS/Genie SDK:
 
 ## Step 1: Defining a Testbed YAML File
 
-Automation revolves around being able to programmically establish connection
+Automation revolves around being able to programmatically establish connection
 to your testbed devices. To do that, we need to first "describe" what devices
-we have, and "how" to connect to them. In pyATS | Genie ecosystem, this is 
+we have, and "how" to connect to them. In the pyATS | Genie ecosystem, this is 
 done using a testbed file. 
 
-Testbed files leverages [YAML](https://yaml.org/spec/1.2/spec.html) syntax to
-describes your devices and their inter-connectivity. It is the basis of almost
-all pyATS | Genie based automation.
+Testbed files leverage [YAML](https://yaml.org/spec/1.2/spec.html) syntax to
+describe your devices and their inter-connectivity. It is the basis of almost
+all pyATS | Genie automation.
 
 > YAML is designed to be a white-space sensitive, human-readable data 
 > representation/serialization language.
@@ -74,7 +74,7 @@ connection to our device and do some fun stuff.
 
 > Note - 
 > 
-> If you have real devices - you can put in their device information and
+> If you have real devices, you can put in their device information and
 > connect to them. For the ease of this workshop, we provided mock devices.
 > They're not real devices, but "emulate" what a device can do, using pure
 > Python code.
@@ -215,8 +215,8 @@ devices:
               ip: 172.25.192.90
               port: 17002
 ```
-Ensure the corresponding environment variables are set - during testbed file
-loading, these references will be then subsitituted with actual values.
+Ensure the corresponding environment variables are set. During testbed file
+loading, these references will be subsitituted with actual values.
 
 Further reading on pyATS testbed file and connection details:
 - schema: supported testbed yaml keys https://pubhub.devnetcloud.com/media/pyats/docs/topology/schema.html#
@@ -238,8 +238,8 @@ file:
 files/workshop-testbed.yaml
 ```
 
-Mock devices are "pre-recorded" device interactions that can be "played back".
-This eliminates the need to use real devices during a training session
+Mock devices are "pre-recorded" device interactions that can be "played back."
+This eliminates the need to use real devices during a training session.
 
 
 ## Step 2: Parsing Device Outputs
@@ -253,7 +253,7 @@ device output into something more "Pythonic" - using parsers.
 pyATS | Genie comes with over 1000 parsers. You can access the list of all 
 available parsers at https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/genie_libs/#/parsers.
 
-To use these parsers, first, load your testbed yaml file.
+To use these parsers, first load your testbed yaml file.
 
 ```python
 from genie.testbed import load
@@ -263,11 +263,11 @@ uut = testbed.devices['uut']
 uut.connect()
 ```
 
-Wait wait wait - do I have to type this every single time? There's must be a
+Wait wait wait - do I have to type this every single time? There must be a
 better way!
 
 ```bash
-# launch python interactive shell, and load teh testbed yaml file
+# launch python interactive shell, and load the testbed yaml file
 genie shell --testbed-file files/workshop-testbed.yaml
 # Welcome to Genie Interactive Shell
 # ==================================
@@ -281,7 +281,7 @@ genie shell --testbed-file files/workshop-testbed.yaml
 ```
 
 Now the testbed is loaded automatically for you, and available as the `testbed`
-variable for you to use in this interfactive shell
+variable for you to use in this interactive shell.
 
 Because we are using Genie, extending the core pyATS functionality, once we
 connect to testbed devices, we can do... more!
@@ -305,9 +305,7 @@ intfs = uut.parse('show interface')
 This invokes the [show interface parser](https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/genie_libs/#/parsers/show%20interface). Remember that Genie libraries are open
 source? You can view the source code [here](https://github.com/CiscoTestAutomation/genieparser/blob/master/src/genie/libs/parser/nxos/show_interface.py#L145).
 
-In Genie parser library, all parsers returns dictionaries. These return 
-dictionaries are described by its own schema, giving you an indication of
-what the parser will return. 
+In the Genie parser library, all parsers return dictionaries. Each dictionary is described by its own schema, giving you an indication of what the parser will return. 
 
 Following this schema, now let's check for our interface's information
 
@@ -339,8 +337,8 @@ for intf, intf_data in sorted(intfs.items()):
 What you have now is awesome. But we're still dealing with single CLIs. How can
 we step back, get a bigger picture in view, and look at an entire feature?
 
-While we ponder about that, let's step back a bit. Even if we were just parsing
-show commands - show commands are particular to each platform. Even for just
+While we ponder that, let's step back a bit. Even if we were just parsing
+show commands, show commands are particular to each platform. Even for just
 interfaces, you'll notice that
 
 - for IOSXE, the command is `show interfaces`
@@ -350,14 +348,14 @@ This means our script above isn't portable...
 
 [Genie models](https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/genie_libs/#/models) to the rescue!
 
-Genie models are YANG-inspired Python classes that implements a whole 
+Genie models are YANG-inspired Python classes that implement a whole 
 feature/protocol agnostically. They’re called YANG-inspired because the 
-development team studies the YANG models of various platforms and crafted 
+development team studied the YANG models of various platforms and crafted 
 their own. Why? Because YANG is a machine-to-machine descriptor, and NETCONF 
 XML comes with its own angle bracket tax…
 
-Built to be human-friendly and engineered to works across different platforms 
-and OSes, Genie models enables users to interact with network devices/protocols
+Built to be human-friendly and engineered to work across different platforms 
+and OSes, Genie models enable users to interact with network devices/protocols
 in a holistic, high-level and Pythonic fashion. 
 
 ```python
@@ -391,7 +389,7 @@ piece of code once, and port it across different devices.
 
 ## Step 4: Putting It All Together
 
-Now let's put everything we've learnt and write a useful script together. For
+Now let's put together everything we've learnt and write a useful script together. For
 this script, we'll make it interesting and for each connected device, do the
 following:
 
@@ -448,29 +446,29 @@ if __name__ == '__main__':
 
 ## Extras: Device Connection Under the Bonnet
 
-Automation revolves around being able to programmically establish connection
-to your testbed devices. There are tools out there today that helps you with
-this, eg:
+Automation revolves around being able to programmatically establish connection
+to your testbed devices. There are tools out there today that help you with
+this, for example:
 
 - [Paramiko](http://www.paramiko.org/): Python implementation of SSH client 
 - [Pexpect](https://pexpect.readthedocs.io/en/stable/): Python module for 
-  spawning child applications (eg, telnet/ssh) and interact with them 
+  spawning child applications (e.g., telnet/ssh) and interacting with them 
 - [Netmiko](https://github.com/ktbyers/netmiko): multi-vendor library that
   simplifies Paramiko SSH connections to network devices 
 
 These libraries are good at establishing low-level connectivity to your devices,
-and allows basic device interactions. However, what they do not provide is 
+and allow basic device interactions. However, what they do not provide is 
 high-level services: stateful handling of various router/switch prompt states, 
 and advanced mechanisms such as dialogs prompts, etc.
 
-In pyATS | Genie automation ecosystem, the de-facto device control library
+In the pyATS | Genie automation ecosystem, the de-facto device control library
 is called [Unicon](https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/index.html).
 In the workshop above, whenever we are establishing connectivity to our testbed
 devices, we are using Unicon.
 
 Compared to the solutions above, Unicon provides both low-level connectivity 
 APIs, eg `sendline`, `expect`, but also high-level apis such as `execute`, 
-`configure`, `ping`, etc, the system dialogs for different platforms can be
+`configure`, `ping`, etc., and the system dialogs for different platforms can be
 automatically handled.
 
 Testbed YAML gives you a more human way of describing testbed devices and simply
