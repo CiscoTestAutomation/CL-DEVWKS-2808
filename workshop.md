@@ -511,11 +511,11 @@ Engineer to focus on building _"business logic"_ instead of fiddling with the
 details of programming, device interactions and parsing libraries.
 
 But so far all that code goes into just simple scripts - and we rely on screen
-printing (eg, `print()`) for message. For traceability, archiving and going
-from simple if-else logic into testcases, we can leverage to full power of
-a pyATS as a test framework..
+`print()` for message. For traceability, archiving and going
+from simple if-else logic into test cases, we can leverage to full power of
+a pyATS as a test framework.
 
-First, let's convert the above Python script into pyATS testcases:
+First, let's convert the above Python script into pyATS test cases:
 
 - we'll create a pyATS test script file
 - break down the above script functionality into different parts of the test
@@ -524,7 +524,7 @@ First, let's convert the above Python script into pyATS testcases:
 - see the log archive.
 
 To write a pyATS test script and corresponding testcases, create a `.py` file,
-import `pyats.aetest` and define your sections. Inside any test script, your
+import `pyats.aetest` and define your sections. Inside, your
 "CommonSetup" sections runs first at the beginning (eg, to setup connectivity),
 "Testcases" run in the order that they are defined, and "CommonCleaup" runs
 at the end of the script.
