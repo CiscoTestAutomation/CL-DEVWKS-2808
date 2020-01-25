@@ -1,0 +1,40 @@
+testbed:
+    name: CL-DEVWKS-2808
+
+devices:
+    nx-osv-1:
+        type: switch
+        os: nos
+        alias: uut
+        credentials:
+            default:
+                username: admin
+                password: cisco
+            enable:
+                password: cisco
+        connections:
+            console:
+                command: mock_device_cli --os nxos --mock_data_dir recordings/yamls/nxos --state execute
+                protocol: telnet
+                ip: 172.25.192.90
+                port: 9001
+    
+    csr1000v-1:
+        type: router
+        os: iosxe
+        alias: helper
+        credentials:
+            default:
+                username: admin
+                password: cisco
+            enable:
+                password: cisco
+        connections:
+            console:
+                command: mock_device_cli --os iosxe --mock_data_dir recordings/yamls/csr --state execute
+                protocol: telnet
+                ip: 172.25.192.90
+                port: 9002
+            mgmt:
+                protocol: ssh
+                ip: 10.1.3.50

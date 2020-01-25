@@ -1,11 +1,11 @@
 # DEVWKS-2808 Main Workshop Content
 
-NetDevOps revolves around the concept of being able to automatically deploy, 
-and more importantly, validate and verify your changes were successful, and that
-the expected outcomes are seen.
+NetDevOps revolves around the concept of being able to automatically and 
+continuously design, develop, deploy, and more importantly, validate and verify 
+your changes were successful, and that the expected outcomes are seen.
 
-In this workshop, we’ll dive deep into the world of Python programming with 
-Cisco pyATS/Genie SDK: 
+In this workshop, we'll dive deep into the world of Python programming with 
+Cisco pyATS/Genie, and learn about: 
 
 1. how to represent your testbed devices and its topology in YAML
 2. connect to the devices
@@ -13,19 +13,37 @@ Cisco pyATS/Genie SDK:
 4. profile your device features
 5. and build a full-on script!
 
+## Mocked Testbed/Devices
+
+Because this workshop is intended for classroom audience (and at home users DIY
+on their own laptop/environment), we will be leveraging pyATS Unicon mock device
+technology - it doesn't require real devices, but "emulates" pre-recorded
+device interactions (eg, `show` commands).
+
+Eg: lines starting with `command: mock_device_cli` instructs the infrastructure
+to use mock devices (or to be more precise, start a connection using this 
+mock command instead of real telnet/ssh etc).
+
+There are a series of limitations with mock devices (eg, you cannot configure 
+them, and their interactions are limited to a pre-defined set of recordings), 
+but should suffice for the workshop training.
+
+If you have devices to tinker with (eg, VIRL or your own lab devices), feel 
+free to use your own host/ip/credentials, and remove the `command:` line.
+
 
 ## Step 1: Defining a Testbed YAML File
 
 Automation revolves around being able to programmatically establish connection
 to your testbed devices. To do that, we need to first "describe" what devices
-we have, and "how" to connect to them. In the pyATS | Genie ecosystem, this is 
-done using a testbed file. 
+we have, and "how" to connect to them. In the pyATS ecosystem, this is done 
+using a testbed file. 
 
 Testbed files leverage [YAML](https://yaml.org/spec/1.2/spec.html) syntax to
 describe your devices and their inter-connectivity. It is the basis of almost
 all pyATS | Genie automation.
 
-> YAML is designed to be a white-space sensitive, human-readable data 
+> YAML is designed to be a white-space sensitive, human-readable data
 > representation/serialization language.
 
 **A Very Simple Testbed YAML File**
@@ -37,9 +55,11 @@ devices:                                # section describing your devices
         os: iosxe                           # os -> used to determine Unicon connection plugin to load
         connections:                            # section describing all device connections
             console:                                # console connection block
+                command: mock_device_cli --os iosxe --mock_data_dir recordings/yamls/csr --state execute
                 protocol: telnet
                 ip: 172.25.192.90
                 port: 17001
+
 ```
 
 > File copy available at [files/simple-testbed.yaml](files/simple-testbed.yaml).
@@ -72,19 +92,6 @@ pyats validate testbed files/simple-testbed.yaml
 Let's now load this testbed file in Python, and, like above, initiate 
 connection to our device and do some fun stuff.
 
-> Note - 
-> 
-> If you have real devices, you can put in their device information and
-> connect to them. For the ease of this workshop, we provided mock devices.
-> They're not real devices, but "emulate" what a device can do, using pure
-> Python code.
->
-> To use the mock device, do: `. env/testbed`.
-> This sets the environment variables needed for the engine to "connect" to
-> the provided mock devices.
->
-> To unset the environment variables, do `. env/unset`
-
 ```python
 from genie.testbed import load
 
@@ -103,48 +110,50 @@ csr.connect()
 csr.execute('show interfaces')
 ```
 
-Now let's expand our concept - throw in a slightly bigger testbed yaml file.
+Now let's expand our concept - throw in as bigger testbed yaml file.
 
 ```yaml
 testbed:
-    name: CLUS-19-DevWks-2808
+    name: CL-DEVWKS-2808
 
 devices:
     nx-osv-1:
         type: switch
         os: nos
-        alias: 'uut'
-        tacacs:
-            login_prompt: "login:"
-            password_prompt: "Password:"
-            username: "admin"
-        passwords:
-            tacacs: Cisc0123
-            enable: admin
-            line: admin
+        alias: uut
+        credentials:
+            default:
+                username: admin
+                password: cisco
+            enable:
+                password: cisco
         connections:
             console:
+                command: mock_device_cli --os nxos --mock_data_dir recordings/yamls/nxos --state execute
                 protocol: telnet
-                ip: "172.25.192.90"
-                port: 17028
+                ip: 172.25.192.90
+                port: 9001
     
     csr1000v-1:
         type: router
         os: iosxe
         alias: helper
-        tacacs:
-            login_prompt: 'login:'
-            password_prompt: 'Password:'
-            username: cisco
-        passwords:
-            tacacs: cisco
-            enable: cisco
-            line: cisco
+        credentials:
+            default:
+                username: admin
+                password: cisco
+            enable:
+                password: cisco
         connections:
             console:
-              protocol: telnet
-              ip: 172.25.192.90
-              port: 17002
+                command: mock_device_cli --os iosxe --mock_data_dir recordings/yamls/csr --state execute
+                protocol: telnet
+                ip: 172.25.192.90
+                port: 9002
+            mgmt:
+                protocol: ssh
+                ip: 10.1.3.50
+               
 ```
 
 We can now connect to each testbed device individually.
@@ -153,7 +162,7 @@ We can now connect to each testbed device individually.
 from genie.testbed import load
 
 # load the testbed file
-testbed = load('files/two-device-testbed.yaml')
+testbed = load('files/complex-testbed.yaml')
 
 # because we assigned aliases to each device, we can refer by alias instead
 nx = testbed.devices['uut']
@@ -161,29 +170,16 @@ csr = testbed.devices['helper']
 
 # connect and run commands
 for device in [nx, csr]:
-    device.connect()
+    device.connect(via = 'console')
     device.execute('show version')
 ```
 
-It is possible to specify multiple methods of connecting to your devices. Eg:
+Note that we are also specifying multiple connection pathways to our device. 
+For example, in the CSR device, we've defined both the management VTY through 
+ssh, and as well the standard console.
 
-```yaml
-
-devices:
-    csr1000v-1:
-        type: router
-        os: iosxe
-        connections:
-            console:
-                protocol: telnet
-                ip: 172.25.192.90
-                port: 17001
-            mgmt:
-                protocol: ssh
-                ip: 10.1.3.50
-```
-
-You can specify which connection desciption to use, as `via`:
+When there are multiple connection pathways, you specify which connection 
+path to use, using `via`:
 
 ```python
 # assuming you followed the above example and:
@@ -194,8 +190,81 @@ You can specify which connection desciption to use, as `via`:
 csr.connect(via = 'mgmt')
 ```
 
+Testbed YAML `connections:` block is the entrypoint for defining the various
+"mechanisms" of how to connect to your devices. It's a quite flexible mechanism,
+where connectivity is described by both how (eg, protocol), and using what (eg,
+the class/object to use to handle the connection). 
+
+Internally in pyATS, this is implemented using what's called connection managers
+and connection implementations. The default connection implementation, [Unicon](https://developer.cisco.com/docs/unicon), supports CLI connectivity (through SSH, telnet, proxy servers etc). Additional
+mechanisms are also available, eg, [NETCONF/YANG](https://yangconnector.readthedocs.io/en/latest/index.html).
+
+## Password Security
+
 If you are uncomfortable with putting straight username and passwords in your 
-testbed file, you can use environment variables instead. 
+testbed file, you can also use the credentials crypto feature, as documented
+in the [topology credentials documentation](https://pubhub.devnetcloud.com/media/pyats/docs/topology/schema.html#credential-password-modeling). Make sure to also read the 
+[pyATS secret string guide](https://pubhub.devnetcloud.com/media/pyats/docs/utilities/secret_strings.html#)
+and make your keys secure.
+
+First, let's create our personal, private pyATS configuration file, and:
+
+1. set it to use a cryptographic safe string encoder
+2. ensure `cryptography` package is installed
+3. generate our secret key
+4. secure the configuration file
+5. add our encrypted passwords to testbed YAML file.
+
+```bash
+
+# install cryptography
+pip install cryptography
+
+# create pyATS configuration directory
+mkdir ~/.pyats/
+
+# set it to use FernetSecretStringRepresenter
+vim ~/.pyats/pyats.conf
+# add the following:
+# [secrets]
+# string.representer = pyats.utils.secret_strings.FernetSecretStringRepresenter
+
+# save, exit, now generate our safe key
+pyats secret keygen
+# output example:
+# Newly generated key :
+# DFSeRzYi_4Tp42QVzQd5AGiOo7_qAmtRJQ1wnViVYpk=
+
+# edit ~/.pyats/pyats.conf and add the key in
+# it should now look like this:
+# [secrets]
+# string.representer = pyats.utils.secret_strings.FernetSecretStringRepresenter
+# string.key = DFSeRzYi_4Tp42QVzQd5AGiOo7_qAmtRJQ1wnViVYpk=
+
+# save exit, now secure the file
+chmod 600 ~/.pyats/pyats.conf
+
+# generate your encrypted passwords
+pyats secret encode cisco123
+# Encoded string :
+# gAAAAABeLF7bLzZMMtaAPcUO8VUdOt8v87llMpEoorgW-yL4wK5FLHqeU2wnyo3Hg8cysNaHPeQjuhhOGZKj98u2xbOg5y3_Mw==
+
+# you can also decode a password from its encrypted form
+pyats secret decode gAAAAABeLF7bLzZMMtaAPcUO8VUdOt8v87llMpEoorgW-yL4wK5FLHqeU2wnyo3Hg8cysNaHPeQjuhhOGZKj98u2xbOg5y3_Mw==
+# Decoded string :
+# cisco123
+```
+
+> Note:
+> 
+>   By default if you don't use a cryptographically safe secret string method
+>   (eg, without pyats.conf content), there is a built-in string "scrambler"
+>   that gets used, but is much less safe.
+> 
+>   In addition, you should make an effort to not share the secret key with
+>   other people. Treat it with the same respect as your SSH key, and/or your
+>   house key.
+
 
 ```yaml
 devices:
@@ -203,25 +272,21 @@ devices:
         type: router
         os: iosxe
         alias: helper
-        tacacs:
-            username: "%ENV{DEVICE_USERNAME}"
-        passwords:
-            tacacs: "%ENV{DEVICE_TACACS_PWD}"
-            enable: "%ENV{DEVICE_ENABLE_PWD}"
-            line: "%ENV{DEVICE_LINE_PWD}"
+        credentials:
+            default:
+                username: admin
+                password: "%ENC{w6DDmsOUw6fDqsOOw5bDiQ==}"
         connections:
-            console:
-              protocol: telnet
-              ip: 172.25.192.90
-              port: 17002
+            mgmt:
+                protocol: ssh
+                ip: 10.1.3.50
 ```
-Ensure the corresponding environment variables are set. During testbed file
-loading, these references will be subsitituted with actual values.
 
 Further reading on pyATS testbed file and connection details:
+- support for credential prompts, encryptions: https://pubhub.devnetcloud.com/media/pyats/docs/topology/schema.html#credential-password-modeling
 - schema: supported testbed yaml keys https://pubhub.devnetcloud.com/media/pyats/docs/topology/schema.html#
 - how connection is modeled and controlled, including support for multiple 
-  simultaenous connection to the same device https://pubhub.devnetcloud.com/media/pyats/docs/connections/manager.html#
+  simultaneous connection to the same device https://pubhub.devnetcloud.com/media/pyats/docs/connections/manager.html#
 
 > Note:
 >
@@ -229,20 +294,13 @@ Further reading on pyATS testbed file and connection details:
 > a library. You can override the default connection class (Unicon) if you wish,
 > and provide your own implementation.
 
-## Mocked Testbed/Devices
-
-For the remainder of this workshop, we'll be using the pre-created testbed mock
-file:
-
-```text
-files/workshop-testbed.yaml
-```
-
-Mock devices are "pre-recorded" device interactions that can be "played back."
-This eliminates the need to use real devices during a training session.
 
 
 ## Step 2: Parsing Device Outputs
+
+> For the remainder of this session, we'll be using the following pre-built
+> testbed yaml file:
+>   files/workshop-testbed.yaml
 
 Now that you have connectivity to your devices, let's do something more fun.
 
@@ -250,8 +308,8 @@ NetDevOps and automation is based on being able to programmatically make
 decisions on your network device states. To do that, we need to first "convert"
 device output into something more "Pythonic" - using parsers.
 
-pyATS | Genie comes with over 1000 parsers. You can access the list of all 
-available parsers at https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/genie_libs/#/parsers.
+pyATS | Genie comes with over 1500 parsers. You can access the list of all 
+available parsers at https://pubhub.devnetcloud.com/media/genie-feature-browser/docs/.
 
 To use these parsers, first load your testbed yaml file.
 
@@ -302,10 +360,12 @@ intfs = uut.parse('show interface')
 
 ```
 
-This invokes the [show interface parser](https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/genie_libs/#/parsers/show%20interface). Remember that Genie libraries are open
-source? You can view the source code [here](https://github.com/CiscoTestAutomation/genieparser/blob/master/src/genie/libs/parser/nxos/show_interface.py#L145).
+This invokes the [show interface parser](https://pubhub.devnetcloud.com/media/genie-feature-browser/docs/#/parsers/show%20interface). Remember that Genie libraries are open
+source? You can view the source code [here](https://github.com/CiscoTestAutomation/genieparser/blob/master/src/genie/libs/parser/nxos/show_interface.py#L150).
 
-In the Genie parser library, all parsers return dictionaries. Each dictionary is described by its own schema, giving you an indication of what the parser will return. 
+In the Genie parser library, all parsers return dictionaries. Each dictionary is 
+described by its own schema, giving you an indication of what the parser will 
+return. 
 
 Following this schema, now let's check for our interface's information
 
@@ -346,10 +406,10 @@ interfaces, you'll notice that
 
 This means our script above isn't portable...
 
-[Genie models](https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/genie_libs/#/models) to the rescue!
+[Genie models](https://pubhub.devnetcloud.com/media/genie-feature-browser/docs/#/models/interface) to the rescue!
 
 Genie models are YANG-inspired Python classes that implement a whole 
-feature/protocol agnostically. They’re called YANG-inspired because the 
+feature/protocol agnostically. They are called YANG-inspired because the 
 development team studied the YANG models of various platforms and crafted 
 their own. Why? Because YANG is a machine-to-machine descriptor, and NETCONF 
 XML comes with its own angle bracket tax…
@@ -462,7 +522,7 @@ high-level services: stateful handling of various router/switch prompt states,
 and advanced mechanisms such as dialogs prompts, etc.
 
 In the pyATS | Genie automation ecosystem, the de-facto device control library
-is called [Unicon](https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/index.html).
+is called [Unicon](https://developer.cisco.com/docs/unicon/).
 In the workshop above, whenever we are establishing connectivity to our testbed
 devices, we are using Unicon.
 
@@ -475,6 +535,13 @@ Testbed YAML gives you a more human way of describing testbed devices and simply
 using them as objects, and establishing connectivity. But if you are interested
 in what's going on under the hood, you can use Unicon directly in your Python 
 code. 
+
+Here are some neat functionalities w.r.t. Unicon:
+
+- Automatically learn the hostname (within reason)
+- Log connection interactions to a whole separate file
+- Connection through proxies (jump hosts)
+- RobotFramework support/keys
 
 > The example below uses Cisco [DevNet Sandbox](https://developer.cisco.com/site/sandbox/)
 > [IOSXE Always-ON testbed](https://devnetsandbox.cisco.com/RM/Diagram/Index/38ded1f0-16ce-43f2-8df5-43a40ebf752e?diagramType=Topology).
@@ -516,23 +583,16 @@ conn.ping('10.10.20.48')
 conn.traceroute('10.10.20.48')
 
 ```
-Notice how the ping and traceroute interfaces are automatically handled for you.
+
+> Notice how the ping and traceroute interfaces are automatically handled for you.
 
 What you have at hand is now a Unicon connection class instance. Each instance,
 depending on the specified OS, supports various different services.
 
-- Connection Documentation: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/connection.html
-- Supported Platforms: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/introduction.html#supported-platforms
-- Services per OS: https://pubhub.devnetcloud.com/media/pyats-packages/docs/unicon/user_guide/services/index.html
-
 Under Unicon connection framework, the core handles boilerplate connection
 details such as spawning child processes, send/receive/expect output, etc. Per
-platform support is achieved through platform plugins, under:
-
-```bash
-    # note - * represents your python version.
-    $VIRTUAL_ENV/lib/python*/site-packages/unicon/plugins/
-```
+platform support is achieved through platform plugins. These plugins are 
+open-source, and available on GitHub: https://github.com/CiscoTestAutomation/unicon.plugins
 
 Each platform plugin contains information such as:
 

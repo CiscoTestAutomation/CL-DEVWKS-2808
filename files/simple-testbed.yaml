@@ -4,6 +4,7 @@ devices:
         os: iosxe
         connections:
             console:
+                command: mock_device_cli --os iosxe --mock_data_dir recordings/yamls/csr --state execute
                 protocol: telnet
                 ip: 172.25.192.90
                 port: 17001

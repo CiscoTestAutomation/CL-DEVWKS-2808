@@ -1,7 +1,7 @@
 # NetDevOps Programming with pyATS/Genie for Beginners
 
 This repository contains the files required for the participants of 
-[Cisco Live US 2019](https://www.ciscolive.com/us.html?zid=cl-global) workshop
+[Cisco Live](https://www.ciscolive.com/us.html?zid=cl-global) workshop
 **DEVWKS-2808: NetDevOps Programming with pyATS/Genie for Beginners.**
 
 > Note: This workshop can be completed at home.
@@ -11,12 +11,11 @@ This repository contains the files required for the participants of
 
 ## General Information
 
-- Cisco Live US: https://www.ciscolive.com/us.html?zid=cl-global
+- Cisco Live! Webpage: https://www.ciscolive.com/us.html?zid=cl-global
 - pyATS/Genie Portal: https://cs.co/pyats
-- Genie Documentation: https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/index.html
-  - Genie CLI: https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/cli/index.html
-  - Parsers, Models: https://pubhub.devnetcloud.com/media/pyats-packages/docs/genie/genie_libs/index.html
-- pyATS Documentation: https://developer.cisco.com/docs/pyats/
+- Documentation Central: https://developer.cisco.com/docs/pyats/
+  - Getting Started: https://developer.cisco.com/docs/pyats/
+  - API Guide: https://developer.cisco.com/docs/pyats/
 - Support Email: pyats-support-ext@cisco.com
 
 ## Requirements
@@ -30,7 +29,7 @@ This repository contains the files required for the participants of
 
 > **Note:**
 > 
-> For those attending Cisco Live! US Workshop in person, these instructions
+> For those attending Cisco Live! Workshop in person, these instructions
 > have already been performed on the laptop you are using in front of you.
 
 
@@ -58,14 +57,14 @@ pip install --upgrade pip setuptools
 
 ```bash
 # install our packages 
-pip install pyats genie
+pip install pyats[full]
 ```
 
 > Note:
 >
-> Technically you do not have to install pyats separately as shown above - 
-> Genie builds on top of pyATS, and as such, automatically installs it as a
-> dependency. The above is only shown for explicit clarity.
+> The install target `pyATS[full]` performs a *full* installation, that is, 
+> including the core framework pyATS, the standard libraries Genie, and 
+> additional components such as RobotFramework support etc.
 
 **Step 3: Clone This Repository**
 
