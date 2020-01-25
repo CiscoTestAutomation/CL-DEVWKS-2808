@@ -6,6 +6,10 @@ devices:
         type: 'router'
         os: 'nxos'
         alias: 'uut'
+        credentials:
+            default:
+                username: admin
+                password: cisco
         connections:
             console:
                 command: mock_device_cli --os nxos --mock_data_dir recordings/yamls/nxos --state execute
@@ -15,6 +19,10 @@ devices:
         type: 'router'
         os: "iosxe"
         alias: 'helper'
+        credentials:
+            default:
+                username: admin
+                password: cisco
         connections:
             console:
                 command: mock_device_cli --os iosxe --mock_data_dir recordings/yamls/csr --state execute

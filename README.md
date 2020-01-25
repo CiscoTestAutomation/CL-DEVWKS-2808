@@ -14,8 +14,8 @@ This repository contains the files required for the participants of
 - Cisco Live! Webpage: https://www.ciscolive.com/us.html?zid=cl-global
 - pyATS/Genie Portal: https://cs.co/pyats
 - Documentation Central: https://developer.cisco.com/docs/pyats/
-  - Getting Started: https://developer.cisco.com/docs/pyats/
-  - API Guide: https://developer.cisco.com/docs/pyats/
+  - Getting Started: https://developer.cisco.com/docs/pyats-getting-started/
+  - API Browser: https://pubhub.devnetcloud.com/media/genie-feature-browser/docs/#/
 - Support Email: pyats-support-ext@cisco.com
 
 ## Requirements
@@ -87,7 +87,6 @@ and now you should be ready to get going!
 
 ```text
     recordings/                       mock device recordings
-    env/                              shortcut files that sets the right recording files to use
     files/                            files we will create in this workshop for your reference
     README.md                         this file
     workshop.md                       main workshop instructions

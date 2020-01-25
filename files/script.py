@@ -20,14 +20,12 @@ if __name__ == '__main__':
     print('Software Version: %s %s\n' % (info.os, info.version))
     
     nbr_info = []
-    for bgp_instance in bgp.info['instance']:
-        for vrf in bgp.info['instance'][bgp_instance]['vrf']:
-            for nbr in bgp.info['instance'][bgp_instance]['vrf'][vrf]['neighbor']:
-                state = bgp.info['instance'][bgp_instance]['vrf'][vrf]['neighbor'][nbr]['session_state']
-                nbr_info.append((bgp_instance, vrf, nbr, state))
+    for bgp_instance in bgp.routes_per_peer['instance']:
+        for vrf in bgp.routes_per_peer['instance'][bgp_instance]['vrf']:
+            for nbr in bgp.routes_per_peer['instance'][bgp_instance]['vrf'][vrf]['neighbor']:
+                nbr_info.append((bgp_instance, vrf, nbr))
     
-    print(tabulate(nbr_info, headers = ['BGP Instance', 'VRF', 'Neighbor', 'State']))
+    print(tabulate(nbr_info, headers = ['BGP Instance', 'VRF', 'Neighbor']))
 
-    active_nbr = len([i for i in nbr_info if i[-1].lower() == 'established'])
-    print('\nTotal # of Active Neighbors: %s' % active_nbr)
+    print('\nTotal # of Active Neighbors: %s' % len(nbr_info))
     print('-'*80 + '\n')

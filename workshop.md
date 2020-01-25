@@ -254,17 +254,9 @@ pyats secret decode gAAAAABeLF7bLzZMMtaAPcUO8VUdOt8v87llMpEoorgW-yL4wK5FLHqeU2wn
 # Decoded string :
 # cisco123
 ```
-
-> Note:
-> 
->   By default if you don't use a cryptographically safe secret string method
->   (eg, without pyats.conf content), there is a built-in string "scrambler"
->   that gets used, but is much less safe.
-> 
->   In addition, you should make an effort to not share the secret key with
->   other people. Treat it with the same respect as your SSH key, and/or your
->   house key.
-
+You can now use the newly generated encoded string in your testbed YAML file's
+`credentials:` block, where a typical password string goes, put in instead:
+`"%ENC{<encoded-string-here>}"`. Eg:
 
 ```yaml
 devices:
@@ -282,25 +274,30 @@ devices:
                 ip: 10.1.3.50
 ```
 
+> Note:
+> 
+>   By default if you don't use a cryptographically safe secret string method
+>   (eg, without pyats.conf content), there is a built-in string "scrambler"
+>   that gets used, but is much less safe.
+> 
+>   In addition, you should make an effort to not share the secret key with
+>   other people. Treat it with the same respect as your SSH key, and/or your
+>   house key.
+
+
 Further reading on pyATS testbed file and connection details:
 - support for credential prompts, encryptions: https://pubhub.devnetcloud.com/media/pyats/docs/topology/schema.html#credential-password-modeling
 - schema: supported testbed yaml keys https://pubhub.devnetcloud.com/media/pyats/docs/topology/schema.html#
 - how connection is modeled and controlled, including support for multiple 
   simultaneous connection to the same device https://pubhub.devnetcloud.com/media/pyats/docs/connections/manager.html#
 
-> Note:
->
-> Under pyATS | Genie design, connection implementation exists in the form of
-> a library. You can override the default connection class (Unicon) if you wish,
-> and provide your own implementation.
-
-
 
 ## Step 2: Parsing Device Outputs
 
 > For the remainder of this session, we'll be using the following pre-built
 > testbed yaml file:
->   files/workshop-testbed.yaml
+> 
+>   `files/workshop-testbed.yaml`
 
 Now that you have connectivity to your devices, let's do something more fun.
 
@@ -337,6 +334,12 @@ genie shell --testbed-file files/workshop-testbed.yaml
 # -------------------------------------------------------------------------------
 # >>>
 ```
+
+> Note:
+>   
+>   Note that starting v20.1 release, `genie shell` command will be merged into
+>   the main pyATS command as part of a harmonization effort. The new command
+>   will be `pyats shell` instead.
 
 Now the testbed is loaded automatically for you, and available as the `testbed`
 variable for you to use in this interactive shell.
@@ -436,11 +439,12 @@ pprint.pprint(bgp.info)
 # what if we could... track the number of neighbors we have?
 num_nbr = 0
 
-for bgp_instance in bgp.info['instance'].values():
+for bgp_instance in bgp.routes_per_peer['instance'].values():
     for vrf in bgp_instance['vrf'].values():
         for nbr in vrf['neighbor'].values():
-            if nbr['session_state'] =='established':
-                num_nbr += 1
+            num_nbr += 1
+
+print(num_nbr)
 ```
 
 Because Genie models are agnostic across different platforms, you can write a 
@@ -489,20 +493,16 @@ if __name__ == '__main__':
     print('Software Version: %s %s\n' % (info.os, info.version))
     
     nbr_info = []
-    for bgp_instance in bgp.info['instance']:
-        for vrf in bgp.info['instance'][bgp_instance]['vrf']:
-            for nbr in bgp.info['instance'][bgp_instance]['vrf'][vrf]['neighbor']:
-                state = bgp.info['instance'][bgp_instance]['vrf'][vrf]['neighbor'][nbr]['session_state']
-                nbr_info.append((bgp_instance, vrf, nbr, state))
+    for bgp_instance in bgp.routes_per_peer['instance']:
+        for vrf in bgp.routes_per_peer['instance'][bgp_instance]['vrf']:
+            for nbr in bgp.routes_per_peer['instance'][bgp_instance]['vrf'][vrf]['neighbor']:
+                nbr_info.append((bgp_instance, vrf, nbr))
     
-    print(tabulate(nbr_info, headers = ['BGP Instance', 'VRF', 'Neighbor', 'State']))
+    print(tabulate(nbr_info, headers = ['BGP Instance', 'VRF', 'Neighbor']))
 
-    active_nbr = len([i for i in nbr_info if i[-1].lower() == 'established'])
-    print('\nTotal # of Active Neighbors: %s' % active_nbr)
+    print('\nTotal # of Active Neighbors: %s' % len(nbr_info))
     print('-'*80 + '\n')
-
 ```
-
 
 ## Extras: Device Connection Under the Bonnet
 
@@ -603,3 +603,16 @@ There is no hard-coded information for Cisco-only platforms - everything is a
 plugin. This means you can adjust the behavior for your target platform, or, 
 implement your own platform plugin for other vendors.
 
+
+## Wrapping It Up
+
+In this workshop you've learned the basics of how to start programming with 
+pyATS:
+
+- defining your testbed YAML file
+- connecting to device
+- sending and receiving commands to and from your devices
+- invoking parsers and models from pyATS/Genie library
+
+Arms with the above, you should be able to start automating some aspects of your
+day-to-day activies. Hopefully you had fun, and find this enjoyable!
