@@ -451,10 +451,10 @@ Because Genie models are agnostic across different platforms, you can write a
 piece of code once, and port it across different devices.
 
 
-## Step 4: Putting It All Together
+## Step 4: Putting It All Together To Python Script
 
-Now let's put together everything we've learnt and write a useful script together. For
-this script, we'll make it interesting and for each connected device, do the
+Now let's put together everything we've learnt and write a useful Python script. 
+For this script, we'll make it interesting and for each connected device, do the
 following:
 
 - display hostname
@@ -481,7 +481,6 @@ if __name__ == '__main__':
     testbed = load(os.path.join(HERE, 'workshop-testbed.yaml'))
 
     uut = testbed.devices['uut']
-    helper = testbed.devices['helper']
 
     uut.connect()
     info = uut.learn('platform')
@@ -502,6 +501,66 @@ if __name__ == '__main__':
 
     print('\nTotal # of Active Neighbors: %s' % len(nbr_info))
     print('-'*80 + '\n')
+```
+
+## Step 5: pyATS Test Script, Logs & Etc
+
+In the last section you've learnt about how to write straight forward Python 
+scripts that leverages components of pyATS, and enable you as a Network 
+Engineer to focus on building _"business logic"_ instead of fiddling with the 
+details of programming, device interactions and parsing libraries.
+
+But so far all that code goes into just simple scripts - and we rely on screen
+printing (eg, `print()`) for message. For traceability, archiving and going
+from simple if-else logic into testcases, we can leverage to full power of
+a pyATS as a test framework..
+
+First, let's convert the above Python script into pyATS testcases:
+
+- we'll create a pyATS test script file
+- break down the above script functionality into different parts of the test
+  script
+- run the script inside a pyATS *job*
+- see the log archive.
+
+To write a pyATS test script and corresponding testcases, create a `.py` file,
+import `pyats.aetest` and define your sections. Inside any test script, your
+"CommonSetup" sections runs first at the beginning (eg, to setup connectivity),
+"Testcases" run in the order that they are defined, and "CommonCleaup" runs
+at the end of the script.
+
+See [testsuite/testscript.py](testsuite/testscript.py)
+
+A pyATS test script be run both standalone (just like regular Python files), 
+which does some nice result printing, but is much better when run under a job,
+using `pyats run job` command.
+
+Here's the content of our job file: [testsuite/job.py](testsuite/job.py)
+
+
+This command takes care of:
+- loading the testbed file and passing it in as the final object 
+- creating archives, saving the environment information, logs
+- generating result reports
+
+and enables you to view the logs in browser.
+
+Let's try it:
+
+```bash
+# run our job, and pass in the intended testbed YAML
+pyats run job testsuite/job.py --testbed-file files/workshop-testbed.yaml
+```
+
+Everything we ran is now archived into log format in your user directory.
+To view these logs, use the logs commands:
+
+```bash
+# list all logs so far
+pyats logs list
+
+# see the last log
+pyats logs view
 ```
 
 ## Extras: Device Connection Under the Bonnet
