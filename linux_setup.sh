@@ -25,7 +25,10 @@ source bin/activate
 pip install --upgrade pip setuptools
 
 # install pyATS
-pip install pyats[full]
+pip install pyats[full] 
+
+# install optional dependencies for this workshop
+pip install tabulate cryptography
 
 # clone workshop
 git clone https://github.com/CiscoTestAutomation/CL-DEVWKS-2808 workshop
