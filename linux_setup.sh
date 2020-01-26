@@ -12,10 +12,10 @@
 sudo apt-get install python3 python3-venv python3-pip
 
 # create directories
-mkdir -p ~/workspace/DEVWKS-2808
+mkdir -p ~/workspace/devwks-2808
 
 # create virtual environment for workshop
-cd ~/workspace/DEVWKS-2808
+cd ~/workspace/devwks-2808
 python3 -m venv .
 
 # activate virtual environment
