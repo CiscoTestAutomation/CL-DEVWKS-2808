@@ -1,7 +1,7 @@
-# NetDevOps Programming with pyATS/Genie for Beginners
+# Cisco Live! DEVWKS-2808 NetDevOps Programming with pyATS/Genie for Beginners
 
 This repository contains the files required for the participants of 
-[Cisco Live](https://www.ciscolive.com/us.html?zid=cl-global) workshop
+[Cisco Live!](https://www.ciscolive.com/us.html?zid=cl-global) workshop
 **DEVWKS-2808: NetDevOps Programming with pyATS/Genie for Beginners.**
 
 > Note: This workshop can be completed at home.
@@ -39,7 +39,7 @@ In a new terminal window:
 
 ```bash
 # go to your workspace directory
-# (or where you typicall work from)
+# (or where you typical work from)
 cd ~/workspace
 
 # create python virtual environment
@@ -88,6 +88,7 @@ and now you should be ready to get going!
 ```text
     recordings/                       mock device recordings
     files/                            files we will create in this workshop for your reference
+    testsuite/                        the example pyATS test suite used at the end of workshop
     README.md                         this file
     workshop.md                       main workshop instructions
 ```
